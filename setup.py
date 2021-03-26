@@ -6,6 +6,6 @@ setup(
     description='PyTorch implementation of Graph Networks',
     author='dblancom',
     packages=['torch_graphnet'],
-    url="https://github.com/dblanm/pytorch-gnet",
+    url="https://github.com/dblanm/torch-graphnet",
     license="Clear BSD License"
 )
