@@ -8,7 +8,6 @@ import numpy as np
 import tensorflow as tf
 import torch
 import torch_scatter
-# from torch_geometric.datasets import PPI
 
 from torch_graphnet.utils import receiver_nodes_to_edges, sender_nodes_to_edges, \
     received_edges_to_node_aggregator, sent_edges_to_node_aggregator, context_to_nodes,\
@@ -207,9 +206,9 @@ def test_gns(graphs_tuple: gn.graphs.GraphsTuple):
                                         graph.senders, graph.receivers)
 
         np.testing.assert_allclose(out_graph_tf.nodes.numpy(), node_out.detach().numpy(),
-                                   err_msg="Nodes output does not match")
+                                   err_msg="Interaction network Nodes output does not match")
         np.testing.assert_allclose(out_graph_tf.edges.numpy(), edge_out.detach().numpy(),
-                                   err_msg="Edges output does not match")
+                                   err_msg="Interaction network Edges output does not match")
 
 
     graph_tf = gn.utils_tf.get_graph(graphs_tuple, index=0)
@@ -233,14 +232,9 @@ def build_and_test_gnn_torch(graphs_tuple, graph_net_tf):
     # Get the parameters of the GN TF
     gnn_params = [var.numpy() for var in graph_net_tf.variables]
 
-
-def main():
+if __name__ == "__main__":
     graphs_tuple = create_graph()
     test_gn_utils(graphs_tuple)
     test_blocks(graphs_tuple)
     test_gns(graphs_tuple)
-    # TODO Test GN-Graph Independent
-    # TODO Test IN & GN on a multi-graph dataset
-
-if __name__ == "__main__":
-    main()
+    print("Everything passed")
