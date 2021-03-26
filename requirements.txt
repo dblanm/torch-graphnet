@@ -1,13 +1,8 @@
-hickle>=4.0.4
 numpy>=1.20.1
 matplotlib>=3.3.4
-torch>=1.4.0
+torch>=1.8.0
 torch-scatter==2.0.6
 torch-sparse==0.6.8
 torch-cluster==1.5.9
 torch-spline-conv==1.2.1
 torch-geometric==1.6.3
-tensorflow>=2.1.0-rc1
-dm-sonnet>=2.0.0b0
-tensorflow_probability>=0.12.1
-graph_nets
