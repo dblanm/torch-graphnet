@@ -60,7 +60,7 @@ def sent_edges_to_node_aggregator(nodes, edge_attr, senders, reduce:str):
 
 @torch.jit.script
 def scatter_sum(src: torch.Tensor, idx:torch.Tensor, out_segments: int):
-    out = torch.zeros(out_segments, src.shape[1], dtype=torch.float64)
+    out = torch.zeros(out_segments, src.shape[1], dtype=src.dtype)
     idxs = idx.expand(src.shape[0], src.shape[1])
     return out.scatter_add(dim=0, index=idxs, src=src)
 
