@@ -202,7 +202,7 @@ def test_gns(graphs_tuple: gn.graphs.GraphsTuple):
                                         phi_node=node_fn_torch)
 
         out_graph_tf = INet_tf(graph_gn)
-        node_out, edge_out = INet_torch(graph.nodes, graph.edge_attr,
+        node_out, edge_out, _, _ = INet_torch(graph.nodes, graph.edge_attr,
                                         graph.senders, graph.receivers)
 
         np.testing.assert_allclose(out_graph_tf.nodes.numpy(), node_out.detach().numpy(),
