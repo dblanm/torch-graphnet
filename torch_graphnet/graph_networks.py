@@ -110,11 +110,12 @@ class InteractionNetwork(GraphNetwork):
                                     use_sent_edges=False, use_context=False)
 
     def forward(self, nodes, edge_attr, senders, receivers):
-
+        # We output the senders and receivers so that we can
+        # create a sequential module
         edge_out = self.edge_model(nodes, edge_attr, senders, receivers)
         node_out = self.node_model(nodes, edge_out, senders, receivers)
 
-        return node_out, edge_out
+        return node_out, edge_out, senders, receivers
 
 
 class GraphIndependent(GraphNetwork):
