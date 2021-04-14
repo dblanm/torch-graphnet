@@ -111,6 +111,7 @@ def test_gn_utils(graphs_tuple: gn.graphs.GraphsTuple):
         nodes_redge_tf = redge_to_nodes(graph_gn)
         nodes_sedge = sent_edges_to_node_aggregator(graph.nodes, graph.edge_attr,
                                                     graph.senders, reduce='sum')
+
         nodes_redge = received_edges_to_node_aggregator(graph.nodes, graph.edge_attr,
                                                         graph.receivers, reduce='sum')
 

@@ -2,6 +2,7 @@
 # Author: David Blanco Mulero <david.blancomulero@aalto.fi>
 #
 import torch
+import torch_scatter
 
 @torch.jit.script
 def receiver_nodes_to_edges(nodes:torch.Tensor, receivers:torch.Tensor):
@@ -50,17 +51,15 @@ def context_to_nodes(nodes:torch.Tensor, global_context:torch.Tensor):
 
 
 def received_edges_to_node_aggregator(nodes, edge_attr, receivers, reduce:str):
-    # out = scatter_mean(out, col, dim=0, dim_size=x.size(0))
     return scatter_sum(edge_attr, receivers, nodes.shape[0])
 
 
 def sent_edges_to_node_aggregator(nodes, edge_attr, senders, reduce:str):
     return scatter_sum(edge_attr, senders, nodes.shape[0])
 
-
 @torch.jit.script
 def scatter_sum(src: torch.Tensor, idx:torch.Tensor, out_segments: int):
     out = torch.zeros(out_segments, src.shape[1], dtype=src.dtype, device=src.device)
-    idxs = idx.expand(src.shape[0], src.shape[1])
-    return out.scatter_add(dim=0, index=idxs, src=src)
+    torch_scatter.scatter_add(src, idx, dim=0, out=out)
+    return out
 
