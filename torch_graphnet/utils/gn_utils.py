@@ -14,7 +14,7 @@ def receiver_nodes_to_edges(nodes:torch.Tensor, receivers:torch.Tensor):
     Returns: tensor of shape [E, F_x]
 
     """
-    return nodes[receivers[:, 0], :]
+    return nodes[receivers, :]
 
 @torch.jit.script
 def sender_nodes_to_edges(nodes:torch.Tensor, senders:torch.Tensor):
@@ -25,7 +25,7 @@ def sender_nodes_to_edges(nodes:torch.Tensor, senders:torch.Tensor):
 
     Returns: tensor of shape [E, F_x]
     """
-    return nodes[senders[:, 0], :]
+    return nodes[senders, :]
 
 @torch.jit.script
 def context_to_edges(edge_attr:torch.Tensor, global_context:torch.Tensor):

@@ -26,12 +26,12 @@ class EdgeModel(nn.Module):
         self.use_context = use_context
         self.phi_edge = phi_edge
 
-    def forward(self, nodes, edge_attr, senders, receivers, context=None):
+    def forward(self, nodes, edge_attr, edge_index, context=None):
         """
         Args:
            src: [E, F_x], where E is the number of edges.
-            dest: [E, F_x], where E is the number of edges.
-            edge_attr: [E, F_e]
+            edge_attr: [E, F_e], where E is the number of edges.
+            edge_index: [2, E]: where 0 are the senders  and 1 the recievers
             u: [B, F_u], where B is the number of graphs.
             batch: [E] with max entry B - 1.
 
@@ -41,8 +41,8 @@ class EdgeModel(nn.Module):
         if self.use_context and _context is None:
             raise ValueError("EdgeModel use_globals set to True and globals not provided")
         x = [edge_attr]
-        if self.use_receiver_nodes: x.append(receiver_nodes_to_edges(nodes, receivers))
-        if self.use_sender_nodes: x.append(sender_nodes_to_edges(nodes, senders))
+        if self.use_receiver_nodes: x.append(receiver_nodes_to_edges(nodes, edge_index[1, :]))
+        if self.use_sender_nodes: x.append(sender_nodes_to_edges(nodes, edge_index[0, :]))
         if self.use_context: x.append(context_to_edges(edge_attr, _context))
 
         x = torch.cat(x, dim=-1)
@@ -60,13 +60,13 @@ class NodeModel(torch.nn.Module):
         self.use_context = use_context
         self.reduce = reduce
 
-    def forward(self, nodes, edge_attr, senders, receivers, context=None):
+    def forward(self, nodes, edge_attr, edge_index, context=None):
     # def forward(self, graph:GNData):
         """
         Args:
             x: [N, F_x], where N is the number of nodes.
-            edge_index: [2, E] with max entry N - 1.
-            edge_attr: [E, F_e]
+            edge_attr: [E, F_e], where E is the number of edges.
+            edge_index: [2, E]: where 0 are the senders  and 1 the recievers
             u: [B, F_u]
         Returns:
         """
@@ -74,9 +74,9 @@ class NodeModel(torch.nn.Module):
             raise ValueError("EdgeModel use_globals set to True and globals not provided")
         x = []
         if self.use_received_edges:
-            x.append(received_edges_to_node_aggregator(nodes, edge_attr, receivers, reduce=self.reduce))
+            x.append(received_edges_to_node_aggregator(nodes, edge_attr, edge_index[1, :], reduce=self.reduce))
         if self.use_sent_edges:
-            x.append(sent_edges_to_node_aggregator(nodes, edge_attr, senders, reduce=self.reduce))
+            x.append(sent_edges_to_node_aggregator(nodes, edge_attr, edge_index[0, :], reduce=self.reduce))
         if self.use_context: x.append(context_to_nodes(nodes, context))
 
         x.append(nodes)
@@ -93,7 +93,7 @@ class GraphNetwork(nn.Module):
         self.phi_global = phi_context
 
 
-    def forward(self, nodes, edge_attr, senders, receivers, context=None):
+    def forward(self, nodes, edge_attr, edge_index, context=None):
         raise NotImplementedError
 
 
@@ -109,13 +109,13 @@ class InteractionNetwork(GraphNetwork):
         self.node_model = NodeModel(phi_node=self.phi_node, use_received_edges=True,
                                     use_sent_edges=False, use_context=False)
 
-    def forward(self, nodes, edge_attr, senders, receivers):
+    def forward(self, nodes, edge_attr, edge_index):
         # We output the senders and receivers so that we can
         # create a sequential module
-        edge_out = self.edge_model(nodes, edge_attr, senders, receivers)
-        node_out = self.node_model(nodes, edge_out, senders, receivers)
+        edge_out = self.edge_model(nodes, edge_attr, edge_index)
+        node_out = self.node_model(nodes, edge_out, edge_index)
 
-        return node_out, edge_out, senders, receivers
+        return node_out, edge_out, edge_index
 
 
 class GraphIndependent(GraphNetwork):
@@ -128,7 +128,7 @@ class GraphIndependent(GraphNetwork):
             phi_context = lambda x: x
         super(GraphIndependent, self).__init__(phi_edge, phi_node, phi_context)
 
-    def forward(self, nodes, edge_attr, senders, receivers, context=None):
+    def forward(self, nodes, edge_attr, edge_index, context=None):
 
         node_out = self.phi_node(nodes)
         edge_out = self.phi_edge(edge_attr)

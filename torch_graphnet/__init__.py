@@ -3,6 +3,6 @@
 #
 from torch_graphnet.utils import receiver_nodes_to_edges, sender_nodes_to_edges, \
     received_edges_to_node_aggregator, sent_edges_to_node_aggregator, context_to_nodes, \
-    context_to_edges, GNData
+    context_to_edges
 from torch_graphnet.graph_networks import EdgeModel, NodeModel, InteractionNetwork, GraphNetwork, GraphIndependent
 
